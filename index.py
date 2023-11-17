@@ -45,7 +45,27 @@ class MyServer(BaseHTTPRequestHandler):
                 form_html += "</fieldset><input type=submit></form></body></html>"
                 self.wfile.write(bytes(form_html, "utf-8"))
             elif self.path.startswith("/results"):
-                print("results") # DISPLAY RESULTS HERE
+                form_raw = open("./DATA/FORMS/"+self.path[9:]+".txt", "rt").read()
+                form_stripped = html.escape(form_raw)
+                form_stripped = form_stripped.split("\n")
+                file_questions = open("./DATA/RESPONSES/"+self.path[9:]+".txt", "rt").read().split("!")
+                for i in range(len(file_questions)):
+                    file_questions[i] = file_questions[i].split("$")
+                response_html = "<!DOCTYPE html><html><head><title>RESPONSES</title></head><body>"
+                response_question_num = -1
+                for line in form_stripped:
+                    print(line)
+                    if line[0] == "=":
+                        response_html += "<h1>" + line[2:] + "</h1>"
+                    elif line[0] == "*":
+                        response_html += "<h2>" + line[2:] + "</h2>"
+                        response_question_num += 1
+                        response_answer_num = 0
+                    elif line[0] == "-" or line[0] == "+":
+                        response_html += "<p>" + line + "</p> <p>" + file_questions[response_question_num][response_answer_num] + "</p>"
+                        response_answer_num += 1
+                response_html += "</body></html>"
+                self.wfile.write(bytes(response_html, "utf-8"))
             else:
                 self.wfile.write(open("./www/error.html", "rb").read())
         except Exception as error:
@@ -54,7 +74,7 @@ class MyServer(BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
-        if self.path == "/created": # MAKE THE RESPONSES FILE !!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if self.path == "/created":
             form_data = post_data.decode("utf-8").replace("+", " ")
             form_data = unquote(form_data)
             form_data = form_data[4:]
@@ -91,7 +111,6 @@ class MyServer(BaseHTTPRequestHandler):
                 for part in answer_part:
                     answers += [int(unquote(part))]
                     file_questions = open("./DATA/RESPONSES/"+self.path[8:]+".txt", "rt").read().split("!")
-                    file_questions_temp = []
             for i in range(len(file_questions)):
                 file_questions[i] = file_questions[i].split("$")
             for i in range(0, len(answers)-1, 2):
