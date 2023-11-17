@@ -10,7 +10,7 @@ serverPort = 8080
 
 class MyServer(BaseHTTPRequestHandler):
     def form_creator(file):
-        
+        print(file)
     def _set_response(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -42,10 +42,11 @@ class MyServer(BaseHTTPRequestHandler):
         
         uuid = uuid.uuid4()
         
-        form_file = open(uuid+".txt", "w")
+        form_file = open("./DATA/"+uuid+".txt", "w")
         form_file.write(form_data)
         
         print(form_data)
+        print(form_file)
         
         
         self._set_response()
