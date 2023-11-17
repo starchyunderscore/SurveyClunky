@@ -35,26 +35,28 @@ class MyServer(BaseHTTPRequestHandler):
         print("post")
         content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
         post_data = self.rfile.read(content_length)
-        form_data = post_data.decode("utf-8").replace("+", " ")
-        form_data = unquote(form_data)
-        form_data = form_data[4:]
-        form_data = html.escape(form_data)
-        
-        uuid = uuid.uuid4()
-        
-        form_file = open("./DATA/"+uuid+".txt", "w")
-        form_file.write(form_data)
-        
-        print(form_data)
-        print(form_file)
-        
-        
-        self._set_response()
-        self.wfile.write(bytes("<html><head><title>Created</title></head><body>", "utf-8"))
-        self.wfile.write(bytes("<h1>Your form has been created</h1>", "utf-8"))
-        self.wfile.write(bytes("<p>View form: %s</p>" % "here", "utf-8"))
-        self.wfile.write(bytes("<p>View results: %s</p>" % "there", "utf-8"))
-        self.wfile.write(bytes("</body></html>", "utf-8"))
+        if self.path == "/created":
+            form_data = post_data.decode("utf-8").replace("+", " ")
+            form_data = unquote(form_data)
+            form_data = form_data[4:]
+            form_data = html.escape(form_data)
+            
+            form_uuid = uuid.uuid4().hex
+            
+            form_file = open("./DATA/FORMS/"+form_uuid+".txt", "w")
+            form_response_file = open("./DATA/RESPONSES/"+form_uuid+".txt", "w")
+            form_file.write(form_data)
+            
+            print(form_data)
+            print(form_file)
+            
+            
+            self._set_response()
+            self.wfile.write(bytes("<html><head><title>Created</title></head><body>", "utf-8"))
+            self.wfile.write(bytes("<h1>Your form has been created</h1>", "utf-8"))
+            self.wfile.write(bytes("<p>View form: %s</p>" % "here", "utf-8"))
+            self.wfile.write(bytes("<p>View results: %s</p>" % "there", "utf-8"))
+            self.wfile.write(bytes("</body></html>", "utf-8"))
 
 if __name__ == "__main__":        
     webServer = HTTPServer((hostName, serverPort), MyServer)
