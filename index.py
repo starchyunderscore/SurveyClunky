@@ -54,7 +54,6 @@ class MyServer(BaseHTTPRequestHandler):
                 response_html = "<!DOCTYPE html><html><head><title>RESPONSES</title></head><body>"
                 response_question_num = -1
                 for line in form_stripped:
-                    print(line)
                     if line[0] == "=":
                         response_html += "<h1>" + line[2:] + "</h1>"
                     elif line[0] == "*":
