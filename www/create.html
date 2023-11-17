@@ -3,9 +3,29 @@
     <head></head>
     <body>
         <h1>CREATE</h1>
-        <form method="POST">
-            <textarea name="txt"></textarea>
+        <form method="POST" action="/created">
+            <textarea name="txt" rows=20 cols=50></textarea>
             <input type="submit"/>
         </form>
+
+        <b>Syntax:</b>
+
+<pre>
+= FORM TITLE =
+* Question 1 *
+- Radio 1
+- Radio 2
+- Radio 3
+* Question 2 (Required) *R
++ Multiple choice 1
++ Multiple choice 2
++ Multiple choice 3
+* Question 3 *
+[Short Free response]
+* Question 4 (Required) *R
+%Further explanation of the question%
+{Long Free Response}
+</pre>
+
     </body>
 </html>
