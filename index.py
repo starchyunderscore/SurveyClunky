@@ -42,7 +42,8 @@ class MyServer(BaseHTTPRequestHandler):
         
         uuid = uuid.uuid4()
         
-        form_file = open("myfile.txt", "w")
+        form_file = open(uuid+".txt", "w")
+        form_file.write(form_data)
         
         print(form_data)
         
