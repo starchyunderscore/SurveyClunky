@@ -23,7 +23,22 @@ class MyServer(BaseHTTPRequestHandler):
             elif self.path.startswith("/take"):
                 form_raw = open("./DATA/FORMS/"+self.path[6:]+".txt", "rt").read()
                 form_stripped = html.escape(form_raw)
-                form_html = form_stripped ## HERE IS WHERE I WILL CONVERT IT TO A HTML FORM
+                form_html = "<!DOCTYPE html><html><head><title>FORM</title></head><body><form action='/submit' method='POST'>"
+                question_open = False;
+                for line in form_stripped.split("\n"):
+                    if line[0] == "=":
+                        form_html += "<h1>" + line[1:].strip() + "</h1>"
+                    elif line[0] == "*":
+                        if question_open:
+                            form_html += "</fieldset>"
+                        question_open = True;
+                        question_name = line[1:].strip()
+                        form_html += "<fieldset><h2>" + line[1:].strip() + "</h2>"
+                    elif line[0] == "-":
+                        form_html += "<input type=radio name='" + question_name + "' id='" + line[1:].strip() + "'/> <label for='" + line[1:].strip() + "'> " + line[1:].strip() + "</label><br/>"
+                    elif line[0] == "+":
+                        form_html += "<input type=checkbox name='" + question_name + "' id='" + line[1:].strip() + "'/> <label for='" + line[1:].strip() + "'> " + line[1:].strip() + "</label><br/>"
+                form_html += "</fieldset><input type=submit></form></body></html>"
                 self.wfile.write(bytes(form_html, "utf-8"))
             elif self.path.startswith("/results"):
                 print("results")
@@ -41,13 +56,10 @@ class MyServer(BaseHTTPRequestHandler):
             form_data = unquote(form_data)
             form_data = form_data[4:]
             form_data = html.escape(form_data)
-            
             form_uuid = uuid.uuid4().hex
-            
             form_file = open("./DATA/FORMS/"+form_uuid+".txt", "w")
             form_response_file = open("./DATA/RESPONSES/"+form_uuid+".txt", "w")
             form_file.write(form_data)
-            
             self._set_response()
             self.wfile.write(bytes("<html><head><title>Created</title></head><body>", "utf-8"))
             self.wfile.write(bytes("<h1>Your form has been created</h1>", "utf-8"))
