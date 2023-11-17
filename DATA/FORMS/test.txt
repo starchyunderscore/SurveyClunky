@@ -1,0 +1,7 @@
+= TEST
+* Does it work?
+- Yes
+- No
+* Have you done these things:
++ Change the site name for after creating forms
++ changed index.html to be customized
