@@ -45,7 +45,7 @@ class MyServer(BaseHTTPRequestHandler):
                 form_html += "</fieldset><input type=submit></form></body></html>"
                 self.wfile.write(bytes(form_html, "utf-8"))
             elif self.path.startswith("/results"):
-                print("results")
+                print("results") # DISPLAY RESULTS HERE
             else:
                 self.wfile.write(open("./www/error.html", "rb").read())
         except Exception as error:
@@ -75,14 +75,18 @@ class MyServer(BaseHTTPRequestHandler):
             for answer in answer_data:
                 answer_part = answer.split("=")
                 for part in answer_part:
-                    try:
-                        answers += [int(unquote(part))]
-                    except:
-                        print("Someone tried something funny")
-            # CHANGE RESPONSES TO REFLECT NEW ANSWERS
-            
-            print(self.path[8:])
-            print(answers)
+                    answers += [int(unquote(part))]
+                    file_questions = open("./DATA/RESPONSES/"+self.path[8:]+".txt", "rt").read().split("!")
+                    file_questions_temp = []
+            for i in range(len(file_questions)):
+                file_questions[i] = file_questions[i].split("$")
+            for i in range(0, len(answers)-1, 2):
+                file_questions[answers[i]][answers[i+1]] = str(int(file_questions[answers[i]][answers[i+1]]) + 1)
+            for i in range(len(file_questions)):
+                file_questions[i] = "$".join(file_questions[i])
+            file_questions = "!".join(file_questions)
+            form_response_file = open("./DATA/RESPONSES/"+self.path[8:]+".txt", "w")
+            form_response_file.write(file_questions)
             self._set_response()
             self.wfile.write(bytes("<html><head><title>Created</title></head><body><h1>submitted</h1></body></html>", "utf-8"))
 
