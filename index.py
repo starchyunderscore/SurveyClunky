@@ -24,7 +24,7 @@ class MyServer(BaseHTTPRequestHandler):
                 form_raw = open("./DATA/FORMS/"+self.path[6:]+".txt", "rt").read()
                 form_stripped = html.escape(form_raw)
                 form_html = "<!DOCTYPE html><html><head><title>FORM</title></head><body><form action='/submit/" + self.path[6:] + "' method='POST'>"
-                question_open = False;
+                question_open = False
                 question_name = -1
                 for line in form_stripped.split("\n"):
                     if line[0] == "=":
@@ -32,7 +32,7 @@ class MyServer(BaseHTTPRequestHandler):
                     elif line[0] == "*":
                         if question_open:
                             form_html += "</fieldset>"
-                        question_open = True;
+                        question_open = True
                         question_name +=1
                         answer_value = 0
                         form_html += "<fieldset><h2>" + line[1:].strip() + "</h2>"
@@ -54,20 +54,34 @@ class MyServer(BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
-        if self.path == "/created":
+        if self.path == "/created": # MAKE THE RESPONSES FILE !!!!!!!!!!!!!!!!!!!!!!!!!!!
             form_data = post_data.decode("utf-8").replace("+", " ")
             form_data = unquote(form_data)
             form_data = form_data[4:]
-            form_data = html.escape(form_data)
+            question_open = False
+            form_response_data = ""
+            for line in form_data.split("\n"):
+                if line[0] == "*":
+                    if question_open:
+                        form_response_data += "!"
+                    question_open = True
+                    question_num = 0
+                elif line[0] == "-" or line[0] == "+":
+                    if question_num == 0:
+                        form_response_data += "0"
+                        question_num += 1
+                    else:
+                        form_response_data += "$0"
             form_uuid = uuid.uuid4().hex
             form_file = open("./DATA/FORMS/"+form_uuid+".txt", "w")
             form_response_file = open("./DATA/RESPONSES/"+form_uuid+".txt", "w")
             form_file.write(form_data)
+            form_response_file.write(form_response_data)
             self._set_response()
             self.wfile.write(bytes("<html><head><title>Created</title></head><body>", "utf-8"))
             self.wfile.write(bytes("<h1>Your form has been created</h1>", "utf-8"))
-            self.wfile.write(bytes("<p>View form: URL/take%s</p>" % form_uuid, "utf-8"))
-            self.wfile.write(bytes("<p>View results: URL/results%s</p>" % form_uuid, "utf-8"))
+            self.wfile.write(bytes("<p>View form: URL/take/%s</p>" % form_uuid, "utf-8"))
+            self.wfile.write(bytes("<p>View results: URL/results/%s</p>" % form_uuid, "utf-8"))
             self.wfile.write(bytes("</body></html>", "utf-8"))
         elif self.path.startswith("/submit"):
             answer_data = post_data.decode("utf-8").replace("+", " ").split("&")
