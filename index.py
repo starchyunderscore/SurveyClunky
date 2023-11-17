@@ -9,8 +9,6 @@ hostName = "localhost"
 serverPort = 8080
 
 class MyServer(BaseHTTPRequestHandler):
-    def form_creator(file):
-        print(file)
     def _set_response(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -23,13 +21,16 @@ class MyServer(BaseHTTPRequestHandler):
             elif self.path == "/create":
                 self.wfile.write(open("./www/create.html", "rb").read())
             elif self.path.startswith("/take"):
-                self.wfile.write(bytes(form_creator(open(self.path, "rt").read())))
+                form_raw = open("./DATA/FORMS/"+self.path[6:]+".txt", "rt").read()
+                form_stripped = html.escape(form_raw)
+                form_html = form_stripped ## HERE IS WHERE I WILL CONVERT IT TO A HTML FORM
+                self.wfile.write(bytes(form_html, "utf-8"))
             elif self.path.startswith("/results"):
                 print("results")
             else:
                 self.wfile.write(open("./www/error.html", "rb").read())
-        except:
-            print("error")
+        except Exception as error:
+            print("error: ", error)
             self.wfile.write(open("./www/error.html", "rb").read())
     def do_POST(self):
         print("post")
@@ -47,15 +48,11 @@ class MyServer(BaseHTTPRequestHandler):
             form_response_file = open("./DATA/RESPONSES/"+form_uuid+".txt", "w")
             form_file.write(form_data)
             
-            print(form_data)
-            print(form_file)
-            
-            
             self._set_response()
             self.wfile.write(bytes("<html><head><title>Created</title></head><body>", "utf-8"))
             self.wfile.write(bytes("<h1>Your form has been created</h1>", "utf-8"))
-            self.wfile.write(bytes("<p>View form: %s</p>" % "here", "utf-8"))
-            self.wfile.write(bytes("<p>View results: %s</p>" % "there", "utf-8"))
+            self.wfile.write(bytes("<p>View form: URL/take%s</p>" % form_uuid, "utf-8"))
+            self.wfile.write(bytes("<p>View results: URL/results%s</p>" % form_uuid, "utf-8"))
             self.wfile.write(bytes("</body></html>", "utf-8"))
 
 if __name__ == "__main__":        
