@@ -12,3 +12,6 @@ I wanted a survey site for tor, and since it's best practice to disable javascri
 3. Change the `HostName` & mentions of `SITE` in `index.py`
 4. Edit index.html to be your own kind of thing
 5. Run `index.py` with `python3`
+
+## How come it's so bad?
+This is my first real project in python, and I didn't really care if it was that good. I just wanted to do it.
