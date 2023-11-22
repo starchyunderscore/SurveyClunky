@@ -67,59 +67,62 @@ class MyServer(BaseHTTPRequestHandler):
             else:
                 self.wfile.write(open("./www/error.html", "rb").read())
         except Exception as error:
-            print("error: ", error)
+            print("GET error: ", error)
             self.wfile.write(open("./www/error.html", "rb").read())
     def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length)
-        if self.path == "/created":
-            form_data = post_data.decode("utf-8").replace("+", " ")
-            form_data = unquote(form_data)
-            form_data = form_data[4:]
-            question_open = False
-            form_response_data = ""
-            for line in form_data.split("\n"):
-                if line[0] == "*":
-                    if question_open:
-                        form_response_data += "!"
-                    question_open = True
-                    question_num = 0
-                elif line[0] == "-" or line[0] == "+":
-                    if question_num == 0:
-                        form_response_data += "0"
-                        question_num += 1
-                    else:
-                        form_response_data += "$0"
-            form_uuid = uuid.uuid4().hex
-            form_file = open("./DATA/FORMS/"+form_uuid+".txt", "w")
-            form_response_file = open("./DATA/RESPONSES/"+form_uuid+".txt", "w")
-            form_file.write(form_data)
-            form_response_file.write(form_response_data)
-            self._set_response()
-            self.wfile.write(bytes("<html><head><title>Created</title></head><body>", "utf-8"))
-            self.wfile.write(bytes("<h1>Your form has been created</h1>", "utf-8"))
-            self.wfile.write(bytes("<p>View form: URL/take/%s</p>" % form_uuid, "utf-8"))
-            self.wfile.write(bytes("<p>View results: URL/results/%s</p>" % form_uuid, "utf-8"))
-            self.wfile.write(bytes("</body></html>", "utf-8"))
-        elif self.path.startswith("/submit"):
-            answer_data = post_data.decode("utf-8").replace("+", " ").split("&")
-            answers = []
-            for answer in answer_data:
-                answer_part = answer.split("=")
-                for part in answer_part:
-                    answers += [int(unquote(part))]
-                    file_questions = open("./DATA/RESPONSES/"+self.path[8:]+".txt", "rt").read().split("!")
-            for i in range(len(file_questions)):
-                file_questions[i] = file_questions[i].split("$")
-            for i in range(0, len(answers)-1, 2):
-                file_questions[answers[i]][answers[i+1]] = str(int(file_questions[answers[i]][answers[i+1]]) + 1)
-            for i in range(len(file_questions)):
-                file_questions[i] = "$".join(file_questions[i])
-            file_questions = "!".join(file_questions)
-            form_response_file = open("./DATA/RESPONSES/"+self.path[8:]+".txt", "w")
-            form_response_file.write(file_questions)
-            self._set_response()
-            self.wfile.write(bytes("<html><head><title>Created</title></head><body><h1>submitted</h1></body></html>", "utf-8"))
+        self._set_response()
+        try:
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            if self.path == "/created":
+                form_data = post_data.decode("utf-8").replace("+", " ")
+                form_data = unquote(form_data)
+                form_data = form_data[4:]
+                question_open = False
+                form_response_data = ""
+                for line in form_data.split("\n"):
+                    if line[0] == "*":
+                        if question_open:
+                            form_response_data += "!"
+                        question_open = True
+                        question_num = 0
+                    elif line[0] == "-" or line[0] == "+":
+                        if question_num == 0:
+                            form_response_data += "0"
+                            question_num += 1
+                        else:
+                            form_response_data += "$0"
+                form_uuid = uuid.uuid4().hex
+                form_file = open("./DATA/FORMS/"+form_uuid+".txt", "w")
+                form_response_file = open("./DATA/RESPONSES/"+form_uuid+".txt", "w")
+                form_file.write(form_data)
+                form_response_file.write(form_response_data)
+                self.wfile.write(bytes("<html><head><title>Created</title></head><body>", "utf-8"))
+                self.wfile.write(bytes("<h1>Your form has been created</h1>", "utf-8"))
+                self.wfile.write(bytes("<p>View form: URL/take/%s</p>" % form_uuid, "utf-8"))
+                self.wfile.write(bytes("<p>View results: URL/results/%s</p>" % form_uuid, "utf-8"))
+                self.wfile.write(bytes("</body></html>", "utf-8"))
+            elif self.path.startswith("/submit"):
+                answer_data = post_data.decode("utf-8").replace("+", " ").split("&")
+                answers = []
+                for answer in answer_data:
+                    answer_part = answer.split("=")
+                    for part in answer_part:
+                        answers += [int(unquote(part))]
+                        file_questions = open("./DATA/RESPONSES/"+self.path[8:]+".txt", "rt").read().split("!")
+                for i in range(len(file_questions)):
+                    file_questions[i] = file_questions[i].split("$")
+                for i in range(0, len(answers)-1, 2):
+                    file_questions[answers[i]][answers[i+1]] = str(int(file_questions[answers[i]][answers[i+1]]) + 1)
+                for i in range(len(file_questions)):
+                    file_questions[i] = "$".join(file_questions[i])
+                file_questions = "!".join(file_questions)
+                form_response_file = open("./DATA/RESPONSES/"+self.path[8:]+".txt", "w")
+                form_response_file.write(file_questions)
+                self.wfile.write(bytes("<html><head><title>Created</title></head><body><h1>submitted</h1></body></html>", "utf-8"))
+        except Exception as error:
+            print("POST error: ", error)
+            self.wfile.write(open("./www/error.html", "rb").read())
 
 if __name__ == "__main__":        
     webServer = HTTPServer((hostName, serverPort), MyServer)
