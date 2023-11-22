@@ -15,3 +15,6 @@ I wanted a survey site for tor, and since it's best practice to disable javascri
 
 ## How come it's so bad?
 This is my first real project in python, and I didn't really care if it was that good. I just wanted to do it.
+
+## Whys it called SurveyClunky
+https://en.wikipedia.org/wiki/SurveyMonkey
